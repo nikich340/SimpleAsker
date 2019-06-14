@@ -151,30 +151,6 @@ void SimpleAsker::genOsteoQuest() {
     q_unusedAsks.erase(q_unusedAsks.begin() + idx);
     _dbg_end(__func__);
 }
-void SimpleAsker::setStyleSheets() {
-    _dbg_start(__func__);
-    destinyK = (qreal) screenH / 1000.0;
-    qDebug() << "destinyK: " << destinyK;
-    QString sheetStr = QString("QPushButton { alignment: center; text-align: center; min-height: %1px; font-size: %2px; "
-                               "background-color: rgba(255,255,255,120) }").arg((int)(130 * destinyK)).arg((int)(22 * destinyK)) +
-                       QString("QLabel { alignment: center; text-align: center; font-size: %1px; "
-                               "background-color: rgba(255,255,255,120) }").arg((int)(22 * destinyK)) +
-                       QString("QTreeWidget { alignment: center; text-align: center; font-size: %1px; "
-                               "background-color: rgba(255,255,255,200) }").arg((int)(25 * destinyK)) +
-                       QString("QCheckBox { alignment: center; text-align: center; min-height: %1px; font-size: %2px; "
-                               "background-color: rgba(255, 255, 255, 150) }").arg((int)(75 * destinyK)).arg((int)(25 * destinyK)) +
-                       QString("QLineEdit { alignment: center; text-align: center; min-height: %1px; font-size: %2px; "
-                               "background-color: rgba(255, 255, 255, 150) }").arg((int)(75 * destinyK)).arg((int)(25 * destinyK)) +
-                       QString("QDialog { alignment: center; text-align: center; font-size: %1px; "
-                               "background-color: rgba(255, 255, 255, 150) }").arg((int)(25 * destinyK));
-    qDebug() << sheetStr;
-    this->setStyleSheet(sheetStr);
-    m_pBtnNext->setStyleSheet(QString("color:white; background-color: rgba(0,0,255,175); min-height: %1px").arg((int)(50 * destinyK)));
-    m_pBtnFinish->setStyleSheet(QString("color:white; background-color: rgba(0,0,0,175); min-height: %1px").arg((int)(50 * destinyK)));
-    m_pLblQuestion->setStyleSheet(QString("font-size: %1px; font-weight:bold; color: #001a00").arg((int)(25 * destinyK)));
-    m_pLblInfo->setStyleSheet(QString("font-size: %1px; color: #990099").arg((int)(22 * destinyK)));
-    _dbg_end(__func__);
-}
 void SimpleAsker::setUpObjects() {
     /* GENERAL */
     m_pLayoutMain = new QVBoxLayout;
@@ -200,15 +176,22 @@ void SimpleAsker::setUpObjects() {
 
     /* SETTINGS */
     m_pCheckRus = new QCheckBox;
-
+    m_pDensitySlider = new QSlider(Qt::Horizontal);
     m_pDialogSettings = new QDialog;
     QVBoxLayout* pvbox = new QVBoxLayout;
     QPushButton* pBtnOk = new QPushButton("OK");
+
+    m_pDensitySlider->setRange(screenH / 2, screenH * 2);
+    m_pDensitySlider->setSingleStep(1);
+
     m_pDialogSettings->setWindowOpacity(0.9);
     m_pDialogSettings->setMinimumWidth(screenW * 0.75);
     m_pCheckRus->setTristate(false);
+    connect(m_pDensitySlider, SIGNAL(valueChanged(int)), this, SLOT(onSetStyleSheets(int)));
     connect(pBtnOk, SIGNAL(clicked(bool)), m_pDialogSettings, SLOT(accept()));
     pvbox->addWidget(m_pCheckRus);
+    pvbox->addWidget(new QLabel(m_bLangRu ? "Масштабирование интерфейса (двигайте ползунок)" : "Interface scaling (move slider)"));
+    pvbox->addWidget(m_pDensitySlider);
     pvbox->addWidget(pBtnOk);
     m_pDialogSettings->setModal(true);
     m_pDialogSettings->setLayout(pvbox);
@@ -385,7 +368,8 @@ SimpleAsker::SimpleAsker(QStackedWidget *pswgt) : QStackedWidget(pswgt), m_setti
     screenH = QGuiApplication::primaryScreen()->geometry().height();
     screenW = QGuiApplication::primaryScreen()->geometry().width();
     setUpObjects();
-    setStyleSheets();
+    onSetStyleSheets(m_settings.value("/settings/customScreenH", screenH).toInt());
+    m_pDensitySlider->setValue(customScreenH);
 
     connect(m_pCheckRus, SIGNAL(stateChanged(int)), this, SLOT(onUpdateLanguage(int)));
 
@@ -406,6 +390,7 @@ SimpleAsker::SimpleAsker(QStackedWidget *pswgt) : QStackedWidget(pswgt), m_setti
 SimpleAsker::~SimpleAsker() {
     _dbg_start(__func__);
     m_settings.setValue("/settings/m_bLangRu", m_bLangRu);
+    m_settings.setValue("/settings/customScreenH", customScreenH);
     _dbg_end(__func__);
 }
 
@@ -543,7 +528,7 @@ void SimpleAsker::onPreStartOsteoAsk() {
     pvbox->addWidget(plbl);
     for (int i = 0; i < QSTnames.size(); ++i) {
         QPushButton* btn = new QPushButton(QSTnames[i]);
-        btn->setStyleSheet(QString("color:white; background-color: rgba(0,100,0,175); min-height: %1px").arg(30 * destinyK));
+        btn->setStyleSheet(QString("color:white; background-color: rgba(0,100,0,175); min-height: %1px").arg(30 * densityK));
         connect(btn, SIGNAL(clicked(bool)), pdlg, SLOT(accept()));
         connect(btn, SIGNAL(clicked(bool)), this, SLOT(onChooseQst()));
         pvbox->addWidget(btn);
@@ -566,6 +551,29 @@ void SimpleAsker::onSettings() {
     m_pCheckRus->setCheckState(m_bLangRu ? Qt::Checked : Qt::Unchecked);
 
     m_pDialogSettings->exec();
+    _dbg_end(__func__);
+}
+void SimpleAsker::onSetStyleSheets(int setCustomScreenH) {
+    _dbg_start(__func__);
+    customScreenH = setCustomScreenH;
+    densityK = (qreal) customScreenH / 1000.0;
+    QString sheetStr = QString("QPushButton { alignment: center; text-align: center; min-height: %1px; font-size: %2px; "
+                               "background-color: rgba(255,255,255,120) }").arg((int)(130 * densityK)).arg((int)(22 * densityK)) +
+                       QString("QLabel { alignment: center; text-align: center; font-size: %1px; "
+                               "background-color: rgba(255,255,255,120) }").arg((int)(22 * densityK)) +
+                       QString("QTreeWidget { alignment: center; text-align: center; font-size: %1px; "
+                               "background-color: rgba(255,255,255,200) }").arg((int)(25 * densityK)) +
+                       QString("QCheckBox { alignment: center; text-align: center; min-height: %1px; font-size: %2px; "
+                               "background-color: rgba(255, 255, 255, 150) }").arg((int)(75 * densityK)).arg((int)(25 * densityK)) +
+                       QString("QLineEdit { alignment: center; text-align: center; min-height: %1px; font-size: %2px; "
+                               "background-color: rgba(255, 255, 255, 150) }").arg((int)(75 * densityK)).arg((int)(25 * densityK)) +
+                       QString("QCheckBox { alignment: center; text-align: center; font-size: %1px }").arg((int)(25 * densityK));
+    this->setStyleSheet(sheetStr);
+    m_pBtnNext->setStyleSheet(QString("color:white; background-color: rgba(0,0,255,175); min-height: %1px").arg((int)(50 * densityK)));
+    m_pBtnFinish->setStyleSheet(QString("color:white; background-color: rgba(0,0,0,175); min-height: %1px").arg((int)(50 * densityK)));
+    m_pLblQuestion->setStyleSheet(QString("font-size: %1px; font-weight:bold; color: #001a00").arg((int)(25 * densityK)));
+    m_pLblInfo->setStyleSheet(QString("font-size: %1px; color: #990099").arg((int)(22 * densityK)));
+    m_pDensitySlider->setMinimumHeight(22 * densityK);
     _dbg_end(__func__);
 }
 void SimpleAsker::onStartAsk() {

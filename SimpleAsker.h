@@ -17,7 +17,7 @@
 
 #define upn(x, init, n) for(int x = init; x <= n; ++x)
 #define to_str(a) QString::number(a)
-#define VERSION "2.0"
+#define VERSION "2.1"
 
 class SimpleAsker : public QStackedWidget {
 Q_OBJECT
@@ -26,13 +26,13 @@ private:
     QSettings m_settings;
     QVBoxLayout *m_pLayoutMain, *m_pLayoutMenu, *m_pLayoutPreAsk, *m_pLayoutAsk, *m_pLayoutMore;
     QWidget *m_pWidgetMenu, *m_pWidgetPreAsk, *m_pWidgetAsk, *m_pWidgetMore;
-    qreal destinyK;
 
     /* MENU */
     QCheckBox *m_pCheckRus;
     QPushButton *m_pBtnMenu[4];
 
     /* SETTINGS */
+    QSlider *m_pDensitySlider;
     QDialog *m_pDialogSettings;
 
     /* PREASK */
@@ -81,13 +81,13 @@ private:
     void crash(QString reason);
     void genOsteoQuest();
     void processOsteoXml();
-    void setStyleSheets();
     void setUpObjects();
     void readAsks(QString pathQuest, QString pathAns);
     void readQst(QString path, QString name);
     void updateInfoLabel();
 public:
-    int screenH, screenW;
+    qreal densityK;
+    int screenH, screenW, customScreenH;
     SimpleAsker(QStackedWidget *pswgt = nullptr);
     virtual ~SimpleAsker();
 public slots:
@@ -100,6 +100,7 @@ public slots:
     void onNextOsteoAsk();
     void onPreStartOsteoAsk();
     void onSettings();
+    void onSetStyleSheets(int setCustomScreenH);
     void onStartAsk();
     void onStartOsteoAsk();
     void onUpdateLanguage(int check);
