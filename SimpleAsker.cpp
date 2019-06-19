@@ -151,6 +151,47 @@ void SimpleAsker::genOsteoQuest() {
     q_unusedAsks.erase(q_unusedAsks.begin() + idx);
     _dbg_end(__func__);
 }
+void SimpleAsker::joinAll() {
+    QVector<ask> join;
+    for (auto v: QSTs) {
+        for (auto i : v) {
+            bool foundEqual = false;
+            for (auto j : join) {
+                if (i == j) {
+                    foundEqual = true;
+                    break;
+                }
+            }
+            if (!foundEqual)
+                join.push_back(i);
+        }
+    }
+    QFile out("join.qst");
+    out.open(QFile::WriteOnly | QFile::Text);
+    QTextStream outts(&out);
+    QString outs = "";
+    int cnt = 0;
+    for (auto i : join) {
+        outs += to_str(++cnt) + ". " + i.question;
+        for (auto a : i.answers) {
+            bool ok = true;
+            for (auto ra : i.rightAns) {
+                if (a == ra) {
+                    ok = false;
+                    break;
+                }
+            }
+            if (ok)
+                outs += "# " + a;
+        }
+        for (auto ra : i.rightAns) {
+            outs += "@ " + ra;
+        }
+        outs += "\n";
+    }
+    outts << outs;
+    out.close();
+}
 void SimpleAsker::setUpObjects() {
     _dbg_start(__func__);
     /* GENERAL */
@@ -242,54 +283,14 @@ void SimpleAsker::setUpObjects() {
     m_pLayoutAsk->addLayout(pGridLayout);
     _dbg_end(__func__);
 }
-/*void SimpleAsker::readAsks(QString pathQuest, QString pathAns) {
-    _dbg_start(__func__);
-    QFile in(pathQuest);
-    QFile ans(pathAns);
-    //out.open(QFile::WriteOnly | QFile::Text);
-    if (!in.open(QFile::ReadOnly | QFile::Text)) {
-        crash("File " + in.fileName() + " could not be opened in read-only mode");
-    }
-    if (!ans.open(QFile::ReadOnly | QFile::Text)) {
-        crash("File " + ans.fileName() + " could not be opened in read-only mode");
-    }
-    QString tmp;
-    ask tmpAsk;
-    int state = -1;
-    while (!in.atEnd()) {
-        tmp = in.readLine();
-        qDebug() << tmp;
-        if (tmp[1] == '.') {
-            tmpAsk.answers.push_back(tmp.mid(3));
-            state = 2;
-            qDebug() << "! read a " << tmp.mid(3);
-        } else {
-            if (state == 2) {
-                QString right = ans.readLine();
-                qDebug() << "right " << right;
-                tmpAsk.rightAns = tmpAsk.answers[right.toInt() - 1];
-                q_unusedAsks.push_back(tmpAsk);
-                tmpAsk.question = "";
-                tmpAsk.answers.clear();
-            }
-            state = 1;
-            tmpAsk.question += tmp;
-            qDebug() << "! read q " << tmp;
-        }
-    }
-    tmpAsk.rightAns = tmpAsk.answers[ans.readLine().toInt() - 1];
-    q_unusedAsks.push_back(tmpAsk);
-    in.close();
-    _dbg_end(__func__);
-}*/
-void SimpleAsker::readQst(QString path, QString name) {
+void SimpleAsker::readQst(QString path) {
     _dbg_start(__func__);
     QFile in(path);
-    //out.open(QFile::WriteOnly | QFile::Text);
     if (!in.open(QFile::ReadOnly | QFile::Text)) {
         crash("File " + in.fileName() + " could not be opened in read-only mode");
     }
 
+    QString name = in.readLine();
     QString cur;
     ask tmpAsk;
     QVector<ask> curQst;
@@ -304,7 +305,7 @@ void SimpleAsker::readQst(QString path, QString name) {
                 ++idx;
 
             bool isRight = (cur[idx] == symRight);
-            idx += 3;
+            idx += 5;
 
             if (idx >= cur.length())
                 continue;
@@ -320,7 +321,7 @@ void SimpleAsker::readQst(QString path, QString name) {
                         tmpAsk.question += " (правильный ответ не задан, ищите сами)";
                     curQst.push_back(tmpAsk);
                 } else
-                    qDebug() << "!!!dropping invalid question: " << tmpAsk.question;
+                    qDebug() << "testname: " << name << "!!!dropping invalid question: " << tmpAsk.question;
             }
             tmpAsk.clear();
             while (!isSymbol(cur[idx]) && idx < cur.length())
@@ -357,21 +358,14 @@ SimpleAsker::SimpleAsker(QStackedWidget *pswgt) : QStackedWidget(pswgt), m_setti
     _dbg_start(__func__);
 
     m_bLangRu = m_settings.value("/settings/m_bLangRu", true).toBool();
-    readQst(":/L1-2012.qst", "(2012) Леч В1");
-    readQst(":/L2-2012.qst", "(2012) Леч В2");
-    readQst(":/L3-2012.qst", "(2012) Леч В3");
-    readQst(":/L4-2012.qst", "(2012) Леч В4");
-    readQst(":/L5-2012.qst", "(2012) Леч В5");
-    readQst(":/P1-2012.qst", "(2012) Пед В1");
-    readQst(":/P2-2012.qst", "(2012) Пед В2");
-    readQst(":/P3-2012.qst", "(2012) Пед В3");
-    readQst(":/P4-2012.qst", "(2012) Пед В4");
-    readQst(":/P5-2012.qst", "(2012) Пед В5");
-    readQst(":/S1-2012.qst", "(2012) Стом В1");
-    readQst(":/S2-2012.qst", "(2012) Стом В2");
-    readQst(":/S3-2012.qst", "(2012) Стом В3");
-    readQst(":/B1-2012.qst", "(2012) Биохим В1");
-    //readQst(":/biochem.qst", "ТЕСТЫ ИГА МБХ");
+    readQst(":/1_bio1.qst");
+    readQst(":/1_bio2.qst");
+    readQst(":/1_bio3.qst");
+    readQst(":/1_bio4.qst");
+    readQst(":/1_bio5.qst");
+    readQst(":/1_bio6.qst");
+    readQst(":/1_bio7.qst");
+    //joinAll();
 
     screenH = QGuiApplication::primaryScreen()->geometry().height();
     screenW = QGuiApplication::primaryScreen()->geometry().width();
@@ -463,16 +457,16 @@ void SimpleAsker::onFinishAsk() {
     } else {
         QString pix;
         if (score >= 0.9) {
-            pix = ":/common/score/5.jpg";
+            pix = ":/common/score/b5.jpg";
             m_pPlayer->setMedia(QUrl("qrc:/common/score/5.mp3"));
         } else if (score >= 0.7) {
-            pix = ":/common/score/4.jpg";
+            pix = ":/common/score/b4.jpg";
             m_pPlayer->setMedia(QUrl("qrc:/common/score/4.mp3"));
         } else if (score >= 0.5) {
-            pix = ":/common/score/3.jpg";
+            pix = ":/common/score/b3.jpg";
             m_pPlayer->setMedia(QUrl("qrc:/common/score/3.mp3"));
         } else {
-            pix = ":/common/score/2.jpg";
+            pix = ":/common/score/b2.jpg";
             m_pPlayer->setMedia(QUrl("qrc:/common/score/2.mp3"));
         }
         pdlg = createDialog((m_bLangRu ? "Ваш результат: " : "Your result is: ")
@@ -543,8 +537,7 @@ void SimpleAsker::onPreStartOsteoAsk() {
     }
     pdlg->setModal(true);
     pdlg->setLayout(pvbox);
-    pdlg->show();
-
+    pdlg->exec();
 
     q_unusedAsks.clear();
     q_unusedAsks = QSTs[choosedQst];
@@ -614,7 +607,7 @@ void SimpleAsker::onUpdateLanguage(int check) {
     } else {
         m_bLangRu = false;
     }
-    m_pBtnMenu[0]->setText(m_bLangRu ? "Предэкз биология" : "Preex biology");
+    m_pBtnMenu[0]->setText(m_bLangRu ? "Предэкз наборы" : "Preex sets");
     m_pBtnMenu[1]->setText(m_bLangRu ? "Настройки" : "Settings");
     m_pBtnMenu[2]->setText(m_bLangRu ? "О программе" : "About program");
     m_pBtnMenu[3]->setText(m_bLangRu ? "Выход" : "Quit");

@@ -62,6 +62,9 @@ private:
             answers.clear();
             rightAns.clear();
         }
+        friend bool operator==(const ask& l, const ask& r) {
+            return (l.question == r.question && l.answers == r.answers && l.rightAns == r.rightAns);
+        }
     };
 
     int choosedQst = 0;
@@ -80,10 +83,11 @@ private:
     void clearLayout(QLayout* layout);
     void crash(QString reason);
     void genOsteoQuest();
+    void joinAll();
     void processOsteoXml();
     void setUpObjects();
     void readAsks(QString pathQuest, QString pathAns);
-    void readQst(QString path, QString name);
+    void readQst(QString path);
     void updateInfoLabel();
 public:
     qreal densityK;
