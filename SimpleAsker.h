@@ -64,7 +64,7 @@ private:
         }
     };
 
-    int choosedQst = 1;
+    int choosedQst = 0;
     QVector<ask> q_unusedAsks;
     QVector<QVector<ask>> QSTs;
     QVector<QString> QSTnames;

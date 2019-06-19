@@ -152,6 +152,7 @@ void SimpleAsker::genOsteoQuest() {
     _dbg_end(__func__);
 }
 void SimpleAsker::setUpObjects() {
+    _dbg_start(__func__);
     /* GENERAL */
     m_pLayoutMain = new QVBoxLayout;
     m_pLayoutMenu = new QVBoxLayout;
@@ -190,7 +191,7 @@ void SimpleAsker::setUpObjects() {
     connect(m_pDensitySlider, SIGNAL(valueChanged(int)), this, SLOT(onSetStyleSheets(int)));
     connect(pBtnOk, SIGNAL(clicked(bool)), m_pDialogSettings, SLOT(accept()));
     pvbox->addWidget(m_pCheckRus);
-    pvbox->addWidget(new QLabel(m_bLangRu ? "Масштабирование интерфейса (двигайте ползунок)" : "Interface scaling (move slider)"));
+    pvbox->addWidget(new QLabel(m_bLangRu ? "Масштабирование интерфейса\n(двигайте ползунок)" : "Interface scaling\n(move slider)"));
     pvbox->addWidget(m_pDensitySlider);
     pvbox->addWidget(pBtnOk);
     m_pDialogSettings->setModal(true);
@@ -230,7 +231,7 @@ void SimpleAsker::setUpObjects() {
     upn(i, 0, maxAns - 1) {
         pGridLayout->addWidget(m_pBtnAns[i], i / 2, i % 2);
     }
-    updateInfoLabel();
+    //updateInfoLabel();
 
     pHLayout->addWidget(m_pLblQuestion);
     pHLayout->addWidget(m_pLblInfo);
@@ -239,6 +240,7 @@ void SimpleAsker::setUpObjects() {
 
     m_pLayoutAsk->addLayout(pHLayout);
     m_pLayoutAsk->addLayout(pGridLayout);
+    _dbg_end(__func__);
 }
 /*void SimpleAsker::readAsks(QString pathQuest, QString pathAns) {
     _dbg_start(__func__);
@@ -312,10 +314,15 @@ void SimpleAsker::readQst(QString path, QString name) {
                 tmpAsk.rightAns.push_back(cur.mid(idx));
             }
         } else {
-            if (!tmpAsk.question.isEmpty() && !tmpAsk.answers.empty() && !tmpAsk.rightAns.empty()) {
-                curQst.push_back(tmpAsk);
-                tmpAsk.clear();
+            if (!tmpAsk.question.isEmpty()) {
+                if (!tmpAsk.answers.empty()) {
+                    if (tmpAsk.rightAns.empty())
+                        tmpAsk.question += " (правильный ответ не задан, ищите сами)";
+                    curQst.push_back(tmpAsk);
+                } else
+                    qDebug() << "!!!dropping invalid question: " << tmpAsk.question;
             }
+            tmpAsk.clear();
             while (!isSymbol(cur[idx]) && idx < cur.length())
                 ++idx;
             if (idx == cur.length()) {
@@ -364,6 +371,7 @@ SimpleAsker::SimpleAsker(QStackedWidget *pswgt) : QStackedWidget(pswgt), m_setti
     readQst(":/S2-2012.qst", "(2012) Стом В2");
     readQst(":/S3-2012.qst", "(2012) Стом В3");
     readQst(":/B1-2012.qst", "(2012) Биохим В1");
+    //readQst(":/biochem.qst", "ТЕСТЫ ИГА МБХ");
 
     screenH = QGuiApplication::primaryScreen()->geometry().height();
     screenW = QGuiApplication::primaryScreen()->geometry().width();
