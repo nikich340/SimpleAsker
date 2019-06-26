@@ -1,6 +1,8 @@
 TEMPLATE     = app
-HEADERS	     = SimpleAsker.h
-SOURCES	     = SimpleAsker.cpp main.cpp
+HEADERS	     = SimpleAsker.h \
+    ExtQPushButton.h
+SOURCES	     = SimpleAsker.cpp main.cpp \
+    ExtQPushButton.cpp
 QT          += widgets multimedia
 RESOURCES   += resources/commonRes.qrc
 QMAKE_RESOURCE_FLAGS += -no-compress

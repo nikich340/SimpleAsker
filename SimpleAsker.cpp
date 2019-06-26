@@ -22,13 +22,13 @@ QDialog* SimpleAsker::createDialog(QString info, QString pix, QString accept, QS
     plbl->setWordWrap(true);
 
     if (accept != "-") {
-        QPushButton* pAcc = new QPushButton(accept);
+        ExtQPushButton* pAcc = new ExtQPushButton(accept);
         connect(pAcc, SIGNAL(clicked(bool)), pdlg, SLOT(accept()));
         phbox->addWidget(pAcc);
     }
 
     if (reject != "-") {
-        QPushButton* pRej = new QPushButton(reject);
+        ExtQPushButton* pRej = new ExtQPushButton(reject);
         connect(pRej, SIGNAL(clicked(bool)), pdlg, SLOT(reject()));
         phbox->addWidget(pRej);
     }
@@ -45,16 +45,6 @@ QDialog* SimpleAsker::createDialog(QString info, QString pix, QString accept, QS
     pdlg->setLayout(pvbox);
     pdlg->show();
     return pdlg;
-}
-QPushButton* SimpleAsker::setUpBtn(QLabel* pLbl) {
-    QPushButton* pBtn = new QPushButton;
-    QHBoxLayout *pLayout = new QHBoxLayout;
-    pLbl->setWordWrap(true);
-    pLbl->setAlignment(Qt::AlignCenter);
-    pLayout->addWidget(pLbl);
-    pBtn->setLayout(pLayout);
-    pBtn->setStyleSheet("background-color: rgba(255,255,255,120)");
-    return pBtn;
 }
 bool SimpleAsker::isDigit(QChar c) {
     return (c >= '0' && c <= '9');
@@ -110,7 +100,7 @@ void SimpleAsker::crash(QString reason) {
     pdlg->exec();
     pdlg->deleteLater();
 }
-void SimpleAsker::genOsteoQuest() {
+void SimpleAsker::genQuest() {
     _dbg_start(__func__);
     std::default_random_engine dre(QDateTime::currentMSecsSinceEpoch());
     if (q_unusedAsks.empty()) {
@@ -138,8 +128,8 @@ void SimpleAsker::genOsteoQuest() {
     /* set answer buttons */
     rightBtns.clear();
     upn(i, 0, q_unusedAsks[idx].answers.size() - 1) {
+        m_pBtnAns[i]->setText(q_unusedAsks[idx].answers[i]);
         m_pBtnAns[i]->show();
-        m_pLblAns[i]->setText(q_unusedAsks[idx].answers[i]);
         for (auto v : q_unusedAsks[idx].rightAns) {
             if (v == q_unusedAsks[idx].answers[i])
                 rightBtns.push_back(m_pBtnAns[i]);
@@ -208,7 +198,8 @@ void SimpleAsker::setUpObjects() {
 
     /* MENU */
     upn(i, 0, 3) {
-        m_pBtnMenu[i] = new QPushButton;
+        m_pBtnMenu[i] = new ExtQPushButton;
+        m_pBtnMenu[i]->setParent(this);
         m_pLayoutMenu->addWidget(m_pBtnMenu[i]);
     }
     connect(m_pBtnMenu[0], SIGNAL(clicked(bool)), this, SLOT(onPreStartOsteoAsk()));
@@ -221,7 +212,7 @@ void SimpleAsker::setUpObjects() {
     m_pDensitySlider = new QSlider(Qt::Horizontal);
     m_pDialogSettings = new QDialog;
     QVBoxLayout* pvbox = new QVBoxLayout;
-    QPushButton* pBtnOk = new QPushButton("OK");
+    ExtQPushButton* pBtnOk = new ExtQPushButton("OK");
 
     m_pDensitySlider->setRange(screenH / 2, screenH * 2);
     m_pDensitySlider->setSingleStep(1);
@@ -244,7 +235,7 @@ void SimpleAsker::setUpObjects() {
     QHBoxLayout *pHboxx = new QHBoxLayout;
     pHboxx->addWidget(m_pLblStartFrom);
     pHboxx->addWidget(m_pLineStartFrom);
-    m_pBtnStart = new QPushButton;
+    m_pBtnStart = new ExtQPushButton;
     m_pCheckRandomize = new QCheckBox;
     m_pLayoutPreAsk->addLayout(pHboxx);
     m_pLayoutPreAsk->addWidget(m_pCheckRandomize);
@@ -253,33 +244,33 @@ void SimpleAsker::setUpObjects() {
     /* ASK */
     m_pLblQuestion = new QLabel;
     m_pLblInfo = new QLabel;
-    m_pBtnNext = new QPushButton;
-    m_pBtnFinish = new QPushButton;
+    m_pBtnNext = new ExtQPushButton;
+    m_pBtnFinish = new ExtQPushButton;
     upn(i, 0, maxAns - 1) {
-        m_pLblAns[i] = new QLabel;
-        m_pBtnAns[i] = setUpBtn(m_pLblAns[i]);
+        m_pBtnAns[i] = new ExtQPushButton;
+        m_pBtnAns[i]->setStyleSheet("background-color: rgba(255,255,255,120)");
         connect(m_pBtnAns[i], SIGNAL(clicked(bool)), this, SLOT(onAns()));
     }
     m_pLblQuestion->setWordWrap(true);
-    m_pLblQuestion->setMinimumWidth(screenW * 0.7);
+    //m_pLblQuestion->setMinimumWidth(screenW * 0.7);
     m_pLblQuestion->setAlignment(Qt::AlignCenter);
     m_pLblInfo->setWordWrap(true);
     m_pLblInfo->setAlignment(Qt::AlignCenter);
-    m_pLblInfo->setMinimumWidth(screenW * 0.25);
+    //m_pLblInfo->setMinimumWidth(screenW * 0.25);
 
     QGridLayout* pGridLayout = new QGridLayout;
-    QHBoxLayout* pHLayout = new QHBoxLayout;
+    QVBoxLayout* pVLayout = new QVBoxLayout;
     upn(i, 0, maxAns - 1) {
         pGridLayout->addWidget(m_pBtnAns[i], i / 2, i % 2);
     }
     //updateInfoLabel();
 
-    pHLayout->addWidget(m_pLblQuestion);
-    pHLayout->addWidget(m_pLblInfo);
+    pVLayout->addWidget(m_pLblInfo);
+    pVLayout->addWidget(m_pLblQuestion);
     pGridLayout->addWidget(m_pBtnFinish, maxAns / 2, 0);
     pGridLayout->addWidget(m_pBtnNext, maxAns / 2, 1);
 
-    m_pLayoutAsk->addLayout(pHLayout);
+    m_pLayoutAsk->addLayout(pVLayout);
     m_pLayoutAsk->addLayout(pGridLayout);
     _dbg_end(__func__);
 }
@@ -297,15 +288,17 @@ void SimpleAsker::readQst(QString path) {
     QChar symRight = '@', symWrong = '#';
     while (!in.atEnd()) {
         cur = in.readLine();
-        int idx = 0;
+        int idx = 0, idx2 = 0;
         //qDebug() << "read: " << cur;
-        if (cur.toStdString().find(QString(symRight).toStdString()) != std::string::npos ||
-                cur.toStdString().find(QString(symWrong).toStdString()) != std::string::npos) {
+        while (cur[idx2] == ' ')
+            ++idx2;
+
+        if (cur[idx2] == symRight || cur[idx2] == symWrong) {
             while (cur[idx] != symRight && cur[idx] != symWrong && idx < cur.length())
                 ++idx;
 
             bool isRight = (cur[idx] == symRight);
-            idx += 5;
+            idx += 4;
 
             if (idx >= cur.length())
                 continue;
@@ -320,8 +313,12 @@ void SimpleAsker::readQst(QString path) {
                     if (tmpAsk.rightAns.empty())
                         tmpAsk.question += " (правильный ответ не задан, ищите сами)";
                     curQst.push_back(tmpAsk);
-                } else
-                    qDebug() << "testname: " << name << "!!!dropping invalid question: " << tmpAsk.question;
+                } else {
+                    tmpAsk.question.chop(1);
+                    tmpAsk.question += cur;
+                    continue;
+                    //qDebug() << "testname: " << name << "!!!dropping invalid question: " << tmpAsk.question;
+                }
             }
             tmpAsk.clear();
             while (!isSymbol(cur[idx]) && idx < cur.length())
@@ -341,6 +338,7 @@ void SimpleAsker::readQst(QString path) {
     }
 
     QSTs.push_back(curQst);
+    //qDebug() << "Add qst with " << curQst.size() << " questions";
     QSTnames.push_back(name);
     in.close();
     _dbg_end(__func__);
@@ -349,7 +347,8 @@ void SimpleAsker::updateInfoLabel() {
     m_pLblInfo->setText("<h2>" + QSTnames[choosedQst] + "</h2>" + "\n" +
                         (m_bLangRu ? "Всего: " : "Summary: ") + to_str(q_cnt) + "/" +
                         to_str(q_sum) + (m_bLangRu ? "\nВерно: " : "\nCorrect: ") +
-                        to_str(q_rightAnsCnt) + "/" + to_str(q_cnt));
+                        to_str(q_rightAnsCnt) + "/" + to_str(q_cnt) + " = " +
+                        to_str((qreal)q_rightAnsCnt / (qreal)q_cnt * 100.0) + "%");
 }
 
 /* PUBLIC FUNCTIONS */
@@ -365,6 +364,17 @@ SimpleAsker::SimpleAsker(QStackedWidget *pswgt) : QStackedWidget(pswgt), m_setti
     readQst(":/1_bio5.qst");
     readQst(":/1_bio6.qst");
     readQst(":/1_bio7.qst");
+    /*readQst(":/2_phys1.qst");
+    readQst(":/2_phys2.qst");
+    readQst(":/2_phys3.qst");
+    readQst(":/2_phys4.qst");
+    readQst(":/2_phys5.qst");
+    readQst(":/2_phys6.qst");
+    readQst(":/2_phys7.qst");
+    readQst(":/2_phys8.qst");
+    readQst(":/2_phys9.qst");
+    readQst(":/2_phys10.qst");
+    readQst(":/2_phys11.qst");*/
     //joinAll();
 
     screenH = QGuiApplication::primaryScreen()->geometry().height();
@@ -399,7 +409,7 @@ SimpleAsker::~SimpleAsker() {
 /* PUBLIC SLOTS */
 void SimpleAsker::onAns() {
     _dbg_start(__func__);
-    QPushButton* pBtn = dynamic_cast<QPushButton*>(sender());
+    ExtQPushButton* pBtn = dynamic_cast<ExtQPushButton*>(sender());
 
     bool okay = false;
 
@@ -424,10 +434,11 @@ void SimpleAsker::onAns() {
 }
 void SimpleAsker::onAboutProgram() {
     _dbg_start(__func__);
-    QString txt = QString("<font>") + (m_bLangRu ? "Версия: " : "Version: ") + VERSION + "<br>" +
-            (m_bLangRu ? "Автор: Никита Гребенюк" : "Author: Nikita Grebenyuk") +
-            " (@nikich340)<br>" + (m_bLangRu ? "Оригинальный исходный код: " : "Original source code: ") +
-            "https://github.com/nikich340/AnatomyAsker/tree/SimpleAsker</font>";
+    QString compilationTime = QString("%1 %2").arg(__DATE__).arg(__TIME__);
+    QString txt = QString("<font>Версия: %1<br>"
+                          "Дата и время сборки: %2<br>"
+                          "Автор: Никита Гребенюк (@nikich340)<br>"
+                          "Оригинальный исходный код: https://github.com/nikich340/AnatomyAsker/tree/SimpleAsker</font>").arg(VERSION).arg(compilationTime);
     QDialog *pdlg = createDialog(txt, ":/common/nikich340.jpg", "OK", "-", true);
     pdlg->exec();
     pdlg->deleteLater();
@@ -512,7 +523,7 @@ void SimpleAsker::onNextOsteoAsk() {
     upn(i, 0, maxAns - 1) {
         m_pBtnAns[i]->setStyleSheet("background-color: rgba(255,255,255,120)");
     }
-    genOsteoQuest();
+    genQuest();
     ++q_cnt;
     updateInfoLabel();
     _dbg_end(__func__);
@@ -530,13 +541,14 @@ void SimpleAsker::onPreStartOsteoAsk() {
     pvbox->addWidget(plbl);
     for (int i = 0; i < QSTnames.size(); ++i) {
         QPushButton* btn = new QPushButton(QSTnames[i]);
-        btn->setStyleSheet(QString("color:white; background-color: rgba(0,100,0,175); min-height: %1px").arg(30 * densityK));
+        btn->setStyleSheet(QString("text-align: top left; color:white; background-color: rgba(0,100,0,175); min-height: %1px").arg(30 * densityK));
         connect(btn, SIGNAL(clicked(bool)), pdlg, SLOT(accept()));
         connect(btn, SIGNAL(clicked(bool)), this, SLOT(onChooseQst()));
         pvbox->addWidget(btn);
     }
     pdlg->setModal(true);
     pdlg->setLayout(pvbox);
+    pdlg->setMaximumWidth(screenW);
     pdlg->exec();
 
     q_unusedAsks.clear();
@@ -558,14 +570,12 @@ void SimpleAsker::onSetStyleSheets(int setCustomScreenH) {
     _dbg_start(__func__);
     customScreenH = setCustomScreenH;
     densityK = (qreal) customScreenH / 1000.0;
-    QString sheetStr = QString("QPushButton { alignment: center; text-align: center; min-height: %1px; font-size: %2px; "
+    QString sheetStr = QString("QPushButton { spacing: 2; alignment: center; text-align: center; min-height: %1px; font-size: %2px; "
                                "background-color: rgba(255,255,255,120) }").arg((int)(130 * densityK)).arg((int)(22 * densityK)) +
-                       QString("QLabel { alignment: center; text-align: center; font-size: %1px; "
+                       QString("QLabel { spacing: 2; alignment: center; text-align: center; font-size: %1px; "
                                "background-color: rgba(255,255,255,120) }").arg((int)(22 * densityK)) +
                        QString("QTreeWidget { alignment: center; text-align: center; font-size: %1px; "
                                "background-color: rgba(255,255,255,200) }").arg((int)(25 * densityK)) +
-                       QString("QCheckBox { alignment: center; text-align: center; min-height: %1px; font-size: %2px; "
-                               "background-color: rgba(255, 255, 255, 150) }").arg((int)(75 * densityK)).arg((int)(25 * densityK)) +
                        QString("QLineEdit { alignment: center; text-align: center; min-height: %1px; font-size: %2px; "
                                "background-color: rgba(255, 255, 255, 150) }").arg((int)(75 * densityK)).arg((int)(25 * densityK)) +
                        QString("QCheckBox { alignment: center; text-align: center; font-size: %1px }").arg((int)(25 * densityK));
@@ -593,7 +603,7 @@ void SimpleAsker::onStartOsteoAsk() {
         q_unusedAsks.erase(q_unusedAsks.begin());
     }
     q_sum = q_unusedAsks.size();
-    genOsteoQuest();
+    genQuest();
 
     connect(m_pBtnFinish, SIGNAL(clicked(bool)), this, SLOT(onFinishOsteoAsk()));
     connect(m_pBtnNext, SIGNAL(clicked(bool)), this, SLOT(onNextOsteoAsk()));

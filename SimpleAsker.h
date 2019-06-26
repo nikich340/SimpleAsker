@@ -14,10 +14,11 @@
 
 #include <QtWidgets>
 #include <QMediaPlayer>
+#include "ExtQPushButton.h"
 
 #define upn(x, init, n) for(int x = init; x <= n; ++x)
 #define to_str(a) QString::number(a)
-#define VERSION "2.1"
+#define VERSION "2.2"
 
 class SimpleAsker : public QStackedWidget {
 Q_OBJECT
@@ -29,7 +30,7 @@ private:
 
     /* MENU */
     QCheckBox *m_pCheckRus;
-    QPushButton *m_pBtnMenu[4];
+    ExtQPushButton *m_pBtnMenu[4];
 
     /* SETTINGS */
     QSlider *m_pDensitySlider;
@@ -39,14 +40,14 @@ private:
     QLabel *m_pLblStartFrom;
     QLineEdit *m_pLineStartFrom;
     QCheckBox *m_pCheckRandomize;
-    QPushButton *m_pBtnStart;
+    ExtQPushButton *m_pBtnStart;
 
     /* ASK */
     static const int maxAns = 8;
-    QLabel *m_pLblQuestion, *m_pLblInfo, *m_pLblAns[maxAns];
-    QPushButton *m_pBtnNext, *m_pBtnFinish, *m_pBtnAns[maxAns];
+    QLabel *m_pLblQuestion, *m_pLblInfo;
+    ExtQPushButton *m_pBtnNext, *m_pBtnFinish, *m_pBtnAns[maxAns];
     QMediaPlayer *m_pPlayer;
-    QVector<QPushButton*> rightBtns;
+    QVector<ExtQPushButton*> rightBtns;
 
     /* OTHER */
     bool m_bLangRu = true, m_bLatin = true;
@@ -73,7 +74,6 @@ private:
     QVector<QString> QSTnames;
 
     QDialog* createDialog(QString info, QString pix, QString accept, QString reject, bool mod);
-    QPushButton* setUpBtn(QLabel* pLbl);
     bool isDigit(QChar c);
     bool isSymbol(QChar c);
     bool isUpper(QChar c);
@@ -82,7 +82,7 @@ private:
     void _dbg_end(QString func);
     void clearLayout(QLayout* layout);
     void crash(QString reason);
-    void genOsteoQuest();
+    void genQuest();
     void joinAll();
     void processOsteoXml();
     void setUpObjects();

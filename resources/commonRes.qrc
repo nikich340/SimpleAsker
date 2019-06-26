@@ -21,5 +21,16 @@
 		<file>1_bio5.qst</file>		
 		<file>1_bio6.qst</file>	
 		<file>1_bio7.qst</file>
+		<file>2_phys1.qst</file>
+		<file>2_phys2.qst</file>
+		<file>2_phys3.qst</file>
+		<file>2_phys4.qst</file>
+		<file>2_phys5.qst</file>
+		<file>2_phys6.qst</file>
+		<file>2_phys7.qst</file>
+		<file>2_phys8.qst</file>
+		<file>2_phys9.qst</file>
+		<file>2_phys10.qst</file>
+		<file>2_phys11.qst</file>
     </qresource>
 </RCC>
