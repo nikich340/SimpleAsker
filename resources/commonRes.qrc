@@ -4,10 +4,6 @@
         <file>common/score/3.jpg</file>
         <file>common/score/4.jpg</file>
         <file>common/score/5.jpg</file>
-		<file>common/score/b2.jpg</file>
-        <file>common/score/b3.jpg</file>
-        <file>common/score/b4.jpg</file>
-        <file>common/score/b5.jpg</file>
         <file>common/score/2.mp3</file>
         <file>common/score/3.mp3</file>
         <file>common/score/4.mp3</file>
@@ -32,5 +28,12 @@
 		<file>2_phys9.qst</file>
 		<file>2_phys10.qst</file>
 		<file>2_phys11.qst</file>
+		<file>2_physSENS1.qst</file>
+		<file>2_physSENS2.qst</file>		
+		<file>2_physSENS3.qst</file>		
+		<file>2_physSENS4.qst</file>
+		<file>2_physSENS5.qst</file>		
+		<file>2_physSENS6.qst</file>
+		<file>2_anatomiaALL.qst</file>
     </qresource>
 </RCC>

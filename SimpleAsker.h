@@ -25,8 +25,13 @@ Q_OBJECT
 private:
     /* GENERAL */
     QSettings m_settings;
-    QVBoxLayout *m_pLayoutMain, *m_pLayoutMenu, *m_pLayoutPreAsk, *m_pLayoutAsk, *m_pLayoutMore;
-    QWidget *m_pWidgetMenu, *m_pWidgetPreAsk, *m_pWidgetAsk, *m_pWidgetMore;
+    QVBoxLayout *m_pLayoutMain, *m_pLayoutMenu, *m_pLayoutPreAsk, *m_pLayoutAsk, *m_pLayoutWrong;
+    QWidget *m_pWidgetMenu, *m_pWidgetPreAsk, *m_pWidgetAsk, *m_pWidgetWrong;
+
+    /* WRONG */
+    ExtQPushButton *m_pToMenu, *m_pExit, *m_pResolve;
+    QString s_Info;
+    QLabel *m_plblInfo, *m_pLblPix;
 
     /* MENU */
     QCheckBox *m_pCheckRus;
@@ -47,9 +52,10 @@ private:
     QLabel *m_pLblQuestion, *m_pLblInfo;
     ExtQPushButton *m_pBtnNext, *m_pBtnFinish, *m_pBtnAns[maxAns];
     QMediaPlayer *m_pPlayer;
-    QVector<ExtQPushButton*> rightBtns;
+    QVector<QString> rightAnswers;
 
     /* OTHER */
+    bool isResolving = false;
     bool m_bLangRu = true, m_bLatin = true;
     int dbg_spacing = 0;
     int q_sum = 0, q_rightAnsCnt = 0, q_cnt = 1, q_ansType = 0;
@@ -69,7 +75,8 @@ private:
     };
 
     int choosedQst = 0;
-    QVector<ask> q_unusedAsks;
+    ask currentAsk;
+    QVector<ask> q_unusedAsks, wrongAsks;
     QVector<QVector<ask>> QSTs;
     QVector<QString> QSTnames;
 
@@ -87,7 +94,7 @@ private:
     void processOsteoXml();
     void setUpObjects();
     void readAsks(QString pathQuest, QString pathAns);
-    void readQst(QString path);
+    void readQst(QString path, char type);
     void updateInfoLabel();
 public:
     qreal densityK;
@@ -103,6 +110,7 @@ public slots:
     void onMenu();
     void onNextOsteoAsk();
     void onPreStartOsteoAsk();
+    void onResolve();
     void onSettings();
     void onSetStyleSheets(int setCustomScreenH);
     void onStartAsk();

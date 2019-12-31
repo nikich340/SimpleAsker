@@ -19,11 +19,13 @@ ExtQPushButton::ExtQPushButton(QString s, QPushButton *pPB) : QPushButton(pPB) {
 
     pLabel = new QLabel;
     pLabel->setWordWrap(true);
+    pLabel->setContentsMargins(0, 0, 0, 0);
     pLabel->setAlignment(Qt::AlignCenter);
     pLabel->setText(str);
 
     pLayout = new QVBoxLayout;
     pLayout->addWidget(pLabel);
+    pLayout->setContentsMargins(0, 0, 0, 0);
     pLayout->setAlignment(pLabel, Qt::AlignCenter);
     this->setLayout(pLayout);
 }
@@ -43,6 +45,7 @@ void ExtQPushButton::setText(QString s) {
     if (pLayout == nullptr) {
         pLayout = new QVBoxLayout;
         pLayout->addWidget(pLabel);
+        pLayout->setContentsMargins(0, 0, 0, 0);
         this->setLayout(pLayout);
     }
     pLabel->setText(str);
